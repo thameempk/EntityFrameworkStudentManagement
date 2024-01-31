@@ -1,22 +1,27 @@
-﻿namespace EntityFramework.Models
+﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
+
+namespace EntityFramework.Models
 {
     public interface IStudents
     {
-        public List<Students> GetStudents();
-        public Students GetStudentById(int id);
-        public void AddStudent(Students studentsDto);
-        public void UpdateStudent(int id, Students studentsDto);
-        public void DeleteStudent(int id);
-        public IEnumerable<Students> SearchStudents(string name, string course);
+         List<Students> GetStudents();
+         Students GetStudentById(int id);
+         void AddStudent(StudentsDto studentsDto);
+         void UpdateStudent(int id, StudentsDto studentsDto);
+         void DeleteStudent(int id);
+         IEnumerable<StudentsDto> SearchStudents(string name, string course);
     }
 
     public class StudentServices : IStudents
     {
         private readonly StudentDbContext _dbContext;
+        private readonly IMapper _mapper;
 
-        public StudentServices(StudentDbContext dbContext)
+        public StudentServices(StudentDbContext dbContext, IMapper mapper)
         {
             _dbContext = dbContext;
+            _mapper = mapper;
         }
 
         public List<Students> GetStudents()
@@ -30,13 +35,14 @@
 
         }
 
-        public void AddStudent(Students studentsDto)
+        public void AddStudent(StudentsDto studentsDto)
         {
-            _dbContext.students.Add(studentsDto);
+            var std = _mapper.Map<Students>(studentsDto);
+            _dbContext.students.Add(std);
             _dbContext.SaveChanges();
         }
 
-        public void UpdateStudent(int id, Students studentsDto)
+        public void UpdateStudent(int id, StudentsDto studentsDto)
         {
             var std = _dbContext.students.Find(id);
 
@@ -56,7 +62,7 @@
             _dbContext.students.Remove(std);
         }
 
-        public IEnumerable<Students> SearchStudents(string name, string course)
+        public IEnumerable<StudentsDto> SearchStudents(string name, string course)
         {
             var query = _dbContext.students.AsQueryable();
 
@@ -68,9 +74,11 @@
                 
             }
 
+            var result = query.ProjectTo<StudentsDto>(_mapper.ConfigurationProvider).ToList();
 
 
-            return query.ToList();
+
+            return result;
         }
 
 

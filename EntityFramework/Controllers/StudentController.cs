@@ -32,7 +32,7 @@ namespace EntityFramework.Controllers
 
         [HttpPost]
 
-        public IActionResult AddStudent([FromBody] Students studentsDto)
+        public IActionResult AddStudent([FromBody] StudentsDto studentsDto)
         {
             _students.AddStudent(studentsDto);
             return NoContent();
@@ -40,7 +40,7 @@ namespace EntityFramework.Controllers
 
         [HttpPut("{id}")]
 
-        public IActionResult UpdateStudent(int id, [FromBody] Students studentsDto)
+        public IActionResult UpdateStudent(int id, [FromBody] StudentsDto studentsDto)
         {
             _students.UpdateStudent(id, studentsDto);
             return NoContent();

@@ -10,6 +10,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<StudentDbContext>();
 builder.Services.AddScoped<IStudents, StudentServices>();
+builder.Services.AddAutoMapper(typeof(StudentMapper));
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
