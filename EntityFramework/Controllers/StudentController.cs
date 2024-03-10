@@ -1,18 +1,76 @@
 ﻿using EntityFramework.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Net.Mail;
+using System.Net;
 
 namespace EntityFramework.Controllers
 {
     [Route("api/[controller]")]
-    [ApiController]
+    [ApiController] 
     public class StudentController : ControllerBase
     {
         private readonly IStudents _students;
+        private static Dictionary<string, string> otpDictionary = new Dictionary<string, string>();
 
         public StudentController(IStudents students)
         {
             _students = students;
+        }
+
+
+        [HttpPost]
+        [Route("sendOTP")]
+        public async Task<IActionResult> sendOtp(string email)
+        {
+            string otp = GenerateOTP();
+
+            await SendEmail(email, otp);
+            otpDictionary[email] = otp;
+            return Ok("otp send successfully");
+
+        }
+
+        [HttpPost]
+        [Route("verifyOTP")]
+        public IActionResult verifyOtp(string email, string otp)
+        {
+            if(otpDictionary.ContainsKey(email) && otpDictionary[email] == otp)
+            {
+                otpDictionary.Remove(email);
+                return Ok(true);
+            }
+            else
+            {
+                return Ok(false);
+            }
+        }
+
+        private string GenerateOTP()
+        {
+            // Generate a 6-digit OTP
+            Random rnd = new Random();
+            int otp = rnd.Next(100000, 999999);
+            return otp.ToString();
+        }
+
+        private async Task SendEmail(string toAddress, string otp)
+        {
+           
+            // Implement sending email with OTP here (similar to previous example)
+            SmtpClient smtpClient = new SmtpClient("smtp.gmail.com");
+            smtpClient.Port = 587; // Port number may vary based on your email provider
+            smtpClient.Credentials = new NetworkCredential("thameempk292@gmail.com", "xnuo hihq cfaw mkkg");
+            smtpClient.EnableSsl = true; // Enable SSL for secure connection
+
+            // Create a MailMessage object
+            MailMessage mailMessage = new MailMessage();
+            mailMessage.From = new MailAddress("thameempk292@gmail.com");
+            mailMessage.To.Add(toAddress);
+            mailMessage.Subject = "OTP Verification";
+            mailMessage.Body = "Your OTP for email verification is: " + otp;
+            // Send the email
+            await smtpClient.SendMailAsync(mailMessage);
         }
 
         [HttpGet]

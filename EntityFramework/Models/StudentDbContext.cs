@@ -7,22 +7,18 @@ namespace EntityFramework.Models
         private readonly IConfiguration _configuration;
         private readonly string ConnectionString;
 
-        public StudentDbContext(IConfiguration configuration)
+        public StudentDbContext()
         {
-            _configuration = configuration;
-            ConnectionString = _configuration["ConnectionString:DefaultConnection"];
+        }
+        public StudentDbContext(DbContextOptions<StudentDbContext> options ) : base( options )
+        {
+           
         }
         public DbSet<Students> students { get; set; }
 
         public DbSet<Course> courses { get; set; }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            if (!optionsBuilder.IsConfigured)
-            {
-                optionsBuilder.UseSqlServer(ConnectionString);
-            }
-        }
+       
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

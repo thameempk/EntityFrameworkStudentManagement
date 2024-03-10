@@ -7,9 +7,9 @@ namespace EntityFramework.Models
     {
          List<Students> GetStudents();
          Students GetStudentById(int id);
-         void AddStudent(StudentsDto studentsDto);
-         void UpdateStudent(int id, StudentsDto studentsDto);
-         void DeleteStudent(int id);
+         bool AddStudent(StudentsDto studentsDto);
+         bool UpdateStudent(int id, StudentsDto studentsDto);
+         bool DeleteStudent(int id);
          IEnumerable<StudentsDto> SearchStudents(string name, string course);
     }
 
@@ -17,12 +17,16 @@ namespace EntityFramework.Models
     {
         private readonly StudentDbContext _dbContext;
         private readonly IMapper _mapper;
+        private ILogger<StudentServices> _logger; 
 
-        public StudentServices(StudentDbContext dbContext, IMapper mapper)
+        public StudentServices(StudentDbContext dbContext, IMapper mapper, ILogger<StudentServices> logger)
         {
             _dbContext = dbContext;
             _mapper = mapper;
+            _logger = logger;
         }
+
+       
 
         public List<Students> GetStudents()
         {
@@ -35,31 +39,35 @@ namespace EntityFramework.Models
 
         }
 
-        public void AddStudent(StudentsDto studentsDto)
+        public bool AddStudent(StudentsDto studentsDto)
         {
             var std = _mapper.Map<Students>(studentsDto);
             _dbContext.students.Add(std);
             _dbContext.SaveChanges();
+            return true;
         }
 
-        public void UpdateStudent(int id, StudentsDto studentsDto)
+        public bool UpdateStudent(int id, StudentsDto studentsDto)
         {
             var std = _dbContext.students.Find(id);
 
             std.Name = studentsDto.Name;
             std.Age = studentsDto.Age;
-            std.Email = studentsDto.Email;
-            std.Phone = studentsDto.Phone;
-            std.Password = studentsDto.Password;
             std.CourseId = studentsDto.CourseId;
 
             _dbContext.SaveChanges();
+            return true;
         }
-        public void DeleteStudent(int id)
+        public bool DeleteStudent(int id)
         {
             var std = _dbContext.students.FirstOrDefault(s => s.Id == id);
+            if(std == null)
+            {
+                _logger.LogWarning("no student found");
+            }
 
             _dbContext.students.Remove(std);
+            return true;
         }
 
         public IEnumerable<StudentsDto> SearchStudents(string name, string course)
